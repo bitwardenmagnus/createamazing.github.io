@@ -8,13 +8,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;700&display=swap">
 <style>
   :root{
-    /* Farben einfach hier ändern */
     --bg:#05060a; --fg:#e6f1ff; --muted:#90a4c6;
-    --c1:#c19351;     /* Button/Neon links */
-    --c2:#d3c483;     /* Button Mitte */
-    --c3:#919387;     /* Button rechts */
-    --frame:#c19351;  /* Rahmen-Farbe außen */
-    --frame2:#464742; /* Rahmen-Farbe Verlauf */
+    --c1:#c19351; --c2:#d3c483; --c3:#919387;
+    --frame:#c19351; --frame2:#464742;
+    --ok:#45d483; --warn:#ffd166; --err:#ff6b6b;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -34,37 +31,33 @@
     mask: radial-gradient(ellipse at 50% 50%, #000 60%, transparent 100%);
   }
   @keyframes drift{to{background-position:72px 72px,72px 72px}}
-
   .wrap{position:relative; z-index:1; min-height:100dvh; display:grid; place-items:center; padding:24px}
   .stack{text-align:center; max-width:760px; width:100%}
-
-  /* Neon-Rahmen + Bild */
   .glyph{
     width:min(22vmin,120px); aspect-ratio:1/1; margin:0 auto 16px; border-radius:16px;
     position:relative; overflow:hidden; isolation:isolate;
     box-shadow:0 0 18px color-mix(in oklab, var(--frame) 70%, transparent), 0 0 26px color-mix(in oklab, var(--frame2) 50%, transparent);
   }
   .glyph::before{
-    /* Neon-Rand */
     content:""; position:absolute; inset:0; border-radius:inherit; z-index:1; pointer-events:none;
-    padding:2px; /* Rahmenstärke anpassen */
-    background: linear-gradient(135deg, var(--frame), var(--frame2));
-    -webkit-mask: 
-      linear-gradient(#000 0 0) content-box, 
-      linear-gradient(#000 0 0);
+    padding:2px; background: linear-gradient(135deg, var(--frame), var(--frame2));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor; mask-composite: exclude;
   }
   .glyph img{
     position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
     filter:saturate(1.05) contrast(1.02);
-    transform:scale(1.001);
   }
-
   h1{margin:0 0 6px; font-size:clamp(28px,6vw,56px); font-weight:700; letter-spacing:.6px;
      text-shadow:0 0 18px color-mix(in oklab, var(--c1) 40%, transparent);}
-  p.sub{margin:0 0 28px; color:var(--muted); font-size:clamp(14px,2.2vw,18px)}
-
-  /* Button mit variablen Farben */
+  p.sub{margin:0 10px 18px; color:var(--muted); font-size:clamp(14px,2.2vw,18px)}
+  .status{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:10px 14px; border-radius:12px; background:rgba(255,255,255,.06);
+    font-weight:700; letter-spacing:.4px;
+  }
+  .dot{width:10px; height:10px; border-radius:50%}
+  .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.err{background:var(--err)}
   .cta{
     display:inline-grid; place-items:center;
     padding:clamp(16px,3vw,22px) clamp(28px,6vw,52px);
@@ -78,38 +71,146 @@
       inset 0 0 18px rgba(255,255,255,.35);
     position:relative; transition:transform .12s ease, box-shadow .2s ease;
   }
-  .cta:hover{transform:translateY(-2px) scale(1.02); box-shadow:
-      0 0 14px color-mix(in oklab, var(--c1) 75%, transparent),
-      0 0 34px color-mix(in oklab, var(--c2) 60%, transparent),
-      inset 0 0 22px rgba(255,255,255,.45);}
-  .cta:active{transform:translateY(0) scale(.99)}
+  .cta[disabled]{opacity:.6; cursor:not-allowed}
+  .cta:hover:not([disabled]){transform:translateY(-2px) scale(1.02)}
+  .cta:active:not([disabled]){transform:translateY(0) scale(.99)}
   .halo{position:absolute; inset:0; pointer-events:none; filter:blur(24px); z-index:-1; border-radius:inherit;
     background: radial-gradient(120% 220% at 50% 0%, color-mix(in oklab, var(--c1) 60%, transparent), transparent 60%),
                 radial-gradient(120% 220% at 50% 100%, color-mix(in oklab, var(--c2) 55%, transparent), transparent 60%);
     animation:breathe 5s ease-in-out infinite; opacity:.8;
   }
   @keyframes breathe{50%{transform:scale(1.04)}}
-
   @media (prefers-reduced-motion:reduce){.grid,.halo{animation:none}.cta{transition:none}}
 </style>
+<!-- Cloudflare Turnstile Client -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
   <div class="grid" aria-hidden="true"></div>
   <main class="wrap">
     <div class="stack" role="main" aria-label="Minecraft Server Remote Start">
-      <!-- Eigenes Serverbild hier einfügen -->
       <div class="glyph">
         <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia1.tenor.com%2Fm%2F3SHajRoXGRUAAAAd%2Fexplosion-cats.gif&f=1&nofb=1&ipt=2be50738e9dc0fede7141c5844a60618c5bd395063bc9a8caf74aa0e955cb8c2" alt="Serverbild">
       </div>
 
       <h1>Server starten</h1>
-      <p class="sub">mhmm jaa einfach auf den Knopf hier drücken</p>
+      <p class="sub">Ein Klick startet den Server. Status wird live aktualisiert.</p>
 
-      <a class="cta" href="https://falixnodes.net/startserver?ip=createamazing" target="_blank" rel="noopener">
+      <p id="status" class="status" aria-live="polite">
+        <span id="status-dot" class="dot err"></span>
+        <span id="status-text">Offline</span>
+      </p>
+
+      <div style="height:16px"></div>
+
+      <button id="startBtn" class="cta" type="button">
         START
         <span class="halo"></span>
-      </a>
+      </button>
+
+      <p id="hint" class="sub" style="margin-top:14px; min-height:22px;"></p>
+
+      <!-- Unsichtbares Turnstile-Widget -->
+      <div id="cf-turnstile"
+           class="cf-turnstile"
+           data-sitekey="0x4AAAAAAB0B7uEwc5zscEyP"  <!-- TODO: ersetzen -->
+           data-theme="dark"
+           data-size="invisible"
+           data-callback="onTurnstileSuccess">
+      </div>
     </div>
   </main>
+
+  <script>
+    // ======= CONFIG =======
+    const HOST = "createamazing";           // TODO: Host/Domain deines MC-Servers
+    const PORT = 26468;                     // TODO: Port falls nicht 25565
+    const WORKER_BASE = "https://still-hall-d6b4.ultimativergamer173.workers.dev"; // TODO: URL deines Backends
+
+    const POLL_MS = 5000;
+
+    const $ = (s)=>document.querySelector(s);
+    const statusDot = $("#status-dot");
+    const statusText = $("#status-text");
+    const hint = $("#hint");
+    const startBtn = $("#startBtn");
+
+    function setStatus(state){
+      statusDot.className = "dot";
+      if(state==="online"){ statusDot.classList.add("ok"); statusText.textContent="Online"; }
+      else if(state==="starting"){ statusDot.classList.add("warn"); statusText.textContent="Startet…"; }
+      else { statusDot.classList.add("err"); statusText.textContent="Offline"; }
+    }
+    function setLoading(loading, msg=""){
+      startBtn.disabled = loading;
+      hint.textContent = msg;
+    }
+
+    // Turnstile Flow
+    let pendingStart = false;
+    window.onTurnstileSuccess = async function(token){
+      if(!pendingStart) return;
+      try{
+        const res = await fetch(`${WORKER_BASE}/start`, {
+          method: "POST",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify({ ip: HOST, cfToken: token })
+        });
+        if(!res.ok) throw new Error("Start HTTP " + res.status);
+        hint.textContent = "Start angefordert. Prüfe Status…";
+        await waitUntilOnline();
+      }catch(e){
+        hint.textContent = "Start fehlgeschlagen.";
+        setStatus("offline");
+      }finally{
+        pendingStart = false;
+        setLoading(false);
+      }
+    };
+
+    async function startServer(){
+      setLoading(true, "Sicherheitsprüfung…");
+      setStatus("starting");
+      pendingStart = true;
+      // Unsichtbares Turnstile starten
+      if(window.turnstile){
+        try{ window.turnstile.execute("#cf-turnstile"); }
+        catch(e){ pendingStart = false; setLoading(false); setStatus("offline"); hint.textContent="Captcha konnte nicht geladen werden."; }
+      }else{
+        pendingStart = false;
+        setLoading(false);
+        setStatus("offline");
+        hint.textContent = "Captcha noch nicht bereit. Bitte kurz warten und erneut versuchen.";
+      }
+    }
+
+    async function fetchStatus(){
+      try{
+        const res = await fetch(`${WORKER_BASE}/status?host=${encodeURIComponent(HOST)}&port=${encodeURIComponent(PORT)}`);
+        if(!res.ok) throw new Error("HTTP "+res.status);
+        const data = await res.json();
+        setStatus(data.online ? "online" : "offline");
+        return data.online ? "online" : "offline";
+      }catch(e){
+        // Keine Änderung, dezente Meldung
+        return null;
+      }
+    }
+
+    async function waitUntilOnline(timeoutMs=180000){
+      const end = Date.now()+timeoutMs;
+      while(Date.now() < end){
+        const st = await fetchStatus();
+        if(st==="online"){ hint.textContent = "Server ist online."; return true; }
+        await new Promise(r=>setTimeout(r, POLL_MS));
+      }
+      hint.textContent = "Zeitüberschreitung beim Start.";
+      return false;
+    }
+
+    startBtn.addEventListener("click", startServer);
+    fetchStatus();
+    setInterval(fetchStatus, POLL_MS);
+  </script>
 </body>
 </html>
