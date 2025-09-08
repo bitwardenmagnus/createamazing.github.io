@@ -10,7 +10,6 @@
     .row { margin-bottom: 12px; }
     button { padding: 10px 16px; font-weight: 600; cursor: pointer; }
     .status { margin-top: 16px; }
-    .hidden { display: none; }
     input { padding: 8px; width: 100%; max-width: 420px; }
     label { font-weight: 600; }
     .note { color: #666; font-size: 0.9rem; }
@@ -18,12 +17,11 @@
 </head>
 <body>
   <h1>Server starten</h1>
-
-  <p class="note">Dieses Tool löst das Cloudflare Turnstile (Invisible) aus und sendet einen Start-Request an FalixNodes.</p>
+  <p class="note">Startet deinen Server über FalixNodes. Turnstile läuft unsichtbar im Hintergrund.</p>
 
   <div class="row">
-    <label for="address">Server-Adresse (Host oder Host:Port)</label><br />
-    <input id="address" type="text" placeholder="z. B. createamazing.falixsrv.me:26468" value="createamazing.falixsrv.me:26468" />
+    <label for="address">Server-Host oder IP (ohne Port)</label><br />
+    <input id="address" type="text" placeholder="z. B. createamazing.falixsrv.me oder 85.10.204.233" value="createamazing.falixsrv.me" />
   </div>
 
   <div class="row">
@@ -32,7 +30,6 @@
 
   <div id="status" class="status"></div>
 
-  <!-- Invisible Turnstile widget (non-interactive, pre-clearance) -->
   <div style="height:0;width:0;overflow:hidden;">
     <div id="cf-turnstile"
          class="cf-turnstile"
@@ -48,11 +45,9 @@
 
   <script>
     const WORKER_ENDPOINT = 'https://still-hall-d6b4.ultimativergamer173.workers.dev/start';
-
     const startBtn = document.getElementById('startBtn');
     const statusEl = document.getElementById('status');
     const addressEl = document.getElementById('address');
-
     let pendingStartPayload = null;
 
     function setStatus(msg, ok = false) {
@@ -60,90 +55,47 @@
       statusEl.style.color = ok ? '#0a7d00' : '#b00020';
     }
 
-    function clearStatus() {
-      statusEl.textContent = '';
-    }
-
-    function normalizeAddress(raw) {
-      const s = (raw || '').trim();
-      if (!s) return null;
-      // If no port provided, default to 25565; override if your FalixNodes expects explicit port.
-      if (s.includes(':')) return s;
-      return s + ':25565';
-    }
-
-    startBtn.addEventListener('click', async () => {
-      clearStatus();
-      const addr = normalizeAddress(addressEl.value);
-      if (!addr) {
-        setStatus('Bitte eine gültige Server-Adresse eingeben (Host oder Host:Port).');
+    startBtn.addEventListener('click', () => {
+      const raw = (addressEl.value || '').trim();
+      if (!raw || raw.includes(':')) {
+        setStatus('Bitte Host oder IP ohne Port eingeben.');
         return;
       }
+      pendingStartPayload = { address: raw };
       startBtn.disabled = true;
       startBtn.textContent = 'Arbeite...';
-      pendingStartPayload = { address: addr };
-      try {
-        // Trigger invisible Turnstile
-        if (window.turnstile && document.getElementById('cf-turnstile')) {
-          turnstile.execute(document.getElementById('cf-turnstile'));
-        } else {
-          setStatus('Turnstile konnte nicht initialisiert werden.');
-          startBtn.disabled = false;
-          startBtn.textContent = 'Server jetzt starten';
-        }
-      } catch (e) {
-        setStatus('Fehler beim Ausführen von Turnstile.');
-        startBtn.disabled = false;
-        startBtn.textContent = 'Server jetzt starten';
-      }
+      try { turnstile.execute(document.getElementById('cf-turnstile')); }
+      catch { setStatus('Turnstile konnte nicht gestartet werden.'); startBtn.disabled = false; startBtn.textContent = 'Server jetzt starten'; }
     });
 
-    // Called by Turnstile on success
     async function onTurnstileSuccess(token) {
       if (!pendingStartPayload) return;
       try {
         const res = await fetch(WORKER_ENDPOINT, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'omit',
-          body: JSON.stringify({
-            address: pendingStartPayload.address,
-            cfTurnstileToken: token,
-          }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: pendingStartPayload.address, cfTurnstileToken: token }),
         });
-
         const text = await res.text();
-        let data;
-        try { data = JSON.parse(text); } catch { data = { ok: res.ok, message: text }; }
-
-        if (res.ok) {
-          setStatus(data.message || 'Serverstart ausgelöst.', true);
-        } else {
-          setStatus(data.error || data.message || 'Start fehlgeschlagen.');
-        }
-      } catch (e) {
-        setStatus('Netzwerkfehler beim Start-Request.');
+        let data; try { data = JSON.parse(text); } catch { data = { ok: res.ok, message: text }; }
+        if (res.ok) setStatus(data.message || 'Serverstart ausgelöst.', true);
+        else setStatus(data.error || data.message || 'Start fehlgeschlagen.');
+      } catch {
+        setStatus('Netzwerkfehler.');
       } finally {
+        pendingStartPayload = null;
         startBtn.disabled = false;
         startBtn.textContent = 'Server jetzt starten';
-        pendingStartPayload = null;
-        // Reset token so next click gets a fresh one
         try { turnstile.reset(document.getElementById('cf-turnstile')); } catch {}
       }
     }
-
-    // Called by Turnstile on error
     function onTurnstileError() {
       setStatus('Turnstile-Validierung fehlgeschlagen.');
+      pendingStartPayload = null;
       startBtn.disabled = false;
       startBtn.textContent = 'Server jetzt starten';
-      pendingStartPayload = null;
       try { turnstile.reset(document.getElementById('cf-turnstile')); } catch {}
     }
-
-    // Expose callbacks globally
     window.onTurnstileSuccess = onTurnstileSuccess;
     window.onTurnstileError = onTurnstileError;
   </script>
