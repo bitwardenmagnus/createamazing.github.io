@@ -1,213 +1,151 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>createamazing</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;700&display=swap">
-<style>
-  :root{
-    --bg:#05060a; --fg:#e6f1ff; --muted:#90a4c6;
-    --c1:#c19351; --c2:#d3c483; --c3:#919387;
-    --frame:#c19351; --frame2:#464742;
-    --ok:#45d483; --warn:#ffd166; --err:#ff6b6b;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; color:var(--fg); font-family:"Oxanium",system-ui,Segoe UI,Roboto,Arial;
-    background:
-      radial-gradient(1200px 800px at 15% 15%, rgba(0,245,255,.10), transparent 55%),
-      radial-gradient(900px 700px at 85% 85%, rgba(124,77,255,.10), transparent 55%),
-      linear-gradient(180deg,#04050a,#070916 60%,#05060a);
-    overflow:hidden;
-  }
-  .grid{position:fixed; inset:0; z-index:0; pointer-events:none;
-    background:
-      repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 1px, transparent 1px 72px),
-      repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 1px, transparent 1px 72px);
-    opacity:.5; animation:drift 24s linear infinite;
-    mask: radial-gradient(ellipse at 50% 50%, #000 60%, transparent 100%);
-  }
-  @keyframes drift{to{background-position:72px 72px,72px 72px}}
-  .wrap{position:relative; z-index:1; min-height:100dvh; display:grid; place-items:center; padding:24px}
-  .stack{text-align:center; max-width:760px; width:100%}
-  .glyph{
-    width:min(22vmin,120px); aspect-ratio:1/1; margin:0 auto 16px; border-radius:16px;
-    position:relative; overflow:hidden; isolation:isolate;
-    box-shadow:0 0 18px color-mix(in oklab, var(--frame) 70%, transparent), 0 0 26px color-mix(in oklab, var(--frame2) 50%, transparent);
-  }
-  .glyph::before{
-    content:""; position:absolute; inset:0; border-radius:inherit; z-index:1; pointer-events:none;
-    padding:2px; background: linear-gradient(135deg, var(--frame), var(--frame2));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-  }
-  .glyph img{
-    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-    filter:saturate(1.05) contrast(1.02);
-  }
-  h1{margin:0 0 6px; font-size:clamp(28px,6vw,56px); font-weight:700; letter-spacing:.6px;
-     text-shadow:0 0 18px color-mix(in oklab, var(--c1) 40%, transparent);}
-  p.sub{margin:0 10px 18px; color:var(--muted); font-size:clamp(14px,2.2vw,18px)}
-  .status{
-    display:inline-flex; align-items:center; gap:10px;
-    padding:10px 14px; border-radius:12px; background:rgba(255,255,255,.06);
-    font-weight:700; letter-spacing:.4px;
-  }
-  .dot{width:10px; height:10px; border-radius:50%}
-  .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.err{background:var(--err)}
-  .cta{
-    display:inline-grid; place-items:center;
-    padding:clamp(16px,3vw,22px) clamp(28px,6vw,52px);
-    border-radius:18px; border:0; cursor:pointer; text-decoration:none;
-    color:#061016; font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
-    font-size:clamp(16px,2.8vw,22px);
-    background:linear-gradient(90deg, var(--c1), var(--c2) 55%, var(--c3));
-    box-shadow:
-      0 0 12px color-mix(in oklab, var(--c1) 60%, transparent),
-      0 0 28px color-mix(in oklab, var(--c2) 50%, transparent),
-      inset 0 0 18px rgba(255,255,255,.35);
-    position:relative; transition:transform .12s ease, box-shadow .2s ease;
-  }
-  .cta[disabled]{opacity:.6; cursor:not-allowed}
-  .cta:hover:not([disabled]){transform:translateY(-2px) scale(1.02)}
-  .cta:active:not([disabled]){transform:translateY(0) scale(.99)}
-  .halo{position:absolute; inset:0; pointer-events:none; filter:blur(24px); z-index:-1; border-radius:inherit;
-    background: radial-gradient(120% 220% at 50% 0%, color-mix(in oklab, var(--c1) 60%, transparent), transparent 60%),
-                radial-gradient(120% 220% at 50% 100%, color-mix(in oklab, var(--c2) 55%, transparent), transparent 60%);
-    animation:breathe 5s ease-in-out infinite; opacity:.8;
-  }
-  @keyframes breathe{50%{transform:scale(1.04)}}
-  @media (prefers-reduced-motion:reduce){.grid,.halo{animation:none}.cta{transition:none}}
-</style>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minecraft Server starten</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 24px; max-width: 700px; margin: auto; }
+    .row { margin-bottom: 12px; }
+    button { padding: 10px 16px; font-weight: 600; cursor: pointer; }
+    .status { margin-top: 16px; }
+    .hidden { display: none; }
+    input { padding: 8px; width: 100%; max-width: 420px; }
+    label { font-weight: 600; }
+    .note { color: #666; font-size: 0.9rem; }
+  </style>
 </head>
 <body>
-  <div class="grid" aria-hidden="true"></div>
-  <main class="wrap">
-    <div class="stack" role="main" aria-label="Minecraft Server Remote Start">
-      <div class="glyph">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia1.tenor.com%2Fm%2F3SHajRoXGRUAAAAd%2Fexplosion-cats.gif&f=1&nofb=1&ipt=2be50738e9dc0fede7141c5844a60618c5bd395063bc9a8caf74aa0e955cb8c2" alt="Serverbild">
-      </div>
+  <h1>Server starten</h1>
 
-      <h1>Server starten</h1>
-      <p class="sub">Ein Klick startet den Server. Status wird live aktualisiert.</p>
+  <p class="note">Dieses Tool löst das Cloudflare Turnstile (Invisible) aus und sendet einen Start-Request an FalixNodes.</p>
 
-      <p id="status" class="status" aria-live="polite">
-        <span id="status-dot" class="dot err"></span>
-        <span id="status-text">Offline</span>
-      </p>
+  <div class="row">
+    <label for="address">Server-Adresse (Host oder Host:Port)</label><br />
+    <input id="address" type="text" placeholder="z. B. createamazing.falixsrv.me:26468" value="createamazing.falixsrv.me:26468" />
+  </div>
 
-      <div style="height:16px"></div>
+  <div class="row">
+    <button id="startBtn">Server jetzt starten</button>
+  </div>
 
-      <button id="startBtn" class="cta" type="button">
-        START
-        <span class="halo"></span>
-      </button>
+  <div id="status" class="status"></div>
 
-      <p id="hint" class="sub" style="margin-top:14px; min-height:22px;"></p>
-
-      <div id="cf-turnstile"
-           class="cf-turnstile"
-           data-sitekey="0x4AAAAAAB0B7uEwc5zscEyP"
-           data-theme="dark"
-           data-size="invisible"
-           data-callback="onTurnstileSuccess">
-      </div>
+  <!-- Invisible Turnstile widget (non-interactive, pre-clearance) -->
+  <div style="height:0;width:0;overflow:hidden;">
+    <div id="cf-turnstile"
+         class="cf-turnstile"
+         data-sitekey="0x4AAAAAAB0B7uEwc5zscEyP"
+         data-callback="onTurnstileSuccess"
+         data-error-callback="onTurnstileError"
+         data-before-interactive="true"
+         data-size="invisible"
+         data-refresh-expired="auto"
+         data-refresh-timeout="auto">
     </div>
-  </main>
+  </div>
 
   <script>
-    // ======= CONFIG =======
-    const HOST = "createamazing.falixsrv.me:26468";
-    const PORT = 26468;
-    const WORKER_BASE = "https://still-hall-d6b4.ultimativergamer173.workers.dev";
+    const WORKER_ENDPOINT = 'https://still-hall-d6b4.ultimativergamer173.workers.dev/start';
 
-    const POLL_MS = 5000;
+    const startBtn = document.getElementById('startBtn');
+    const statusEl = document.getElementById('status');
+    const addressEl = document.getElementById('address');
 
-    const $ = (s)=>document.querySelector(s);
-    const statusDot = $("#status-dot");
-    const statusText = $("#status-text");
-    const hint = $("#hint");
-    const startBtn = $("#startBtn");
+    let pendingStartPayload = null;
 
-    function setStatus(state){
-      statusDot.className = "dot";
-      if(state==="online"){ statusDot.classList.add("ok"); statusText.textContent="Online"; }
-      else if(state==="starting"){ statusDot.classList.add("warn"); statusText.textContent="Startet…"; }
-      else { statusDot.classList.add("err"); statusText.textContent="Offline"; }
-    }
-    function setLoading(loading, msg=""){
-      startBtn.disabled = loading;
-      hint.textContent = msg;
+    function setStatus(msg, ok = false) {
+      statusEl.textContent = msg;
+      statusEl.style.color = ok ? '#0a7d00' : '#b00020';
     }
 
-    let pendingStart = false;
-    window.onTurnstileSuccess = async function(token){
-      if(!pendingStart) return;
-      try{
-        const res = await fetch(`${WORKER_BASE}/start`, {
-          method: "POST",
-          headers: { "Content-Type":"application/json" },
-          body: JSON.stringify({ ip: HOST, cfToken: token })
+    function clearStatus() {
+      statusEl.textContent = '';
+    }
+
+    function normalizeAddress(raw) {
+      const s = (raw || '').trim();
+      if (!s) return null;
+      // If no port provided, default to 25565; override if your FalixNodes expects explicit port.
+      if (s.includes(':')) return s;
+      return s + ':25565';
+    }
+
+    startBtn.addEventListener('click', async () => {
+      clearStatus();
+      const addr = normalizeAddress(addressEl.value);
+      if (!addr) {
+        setStatus('Bitte eine gültige Server-Adresse eingeben (Host oder Host:Port).');
+        return;
+      }
+      startBtn.disabled = true;
+      startBtn.textContent = 'Arbeite...';
+      pendingStartPayload = { address: addr };
+      try {
+        // Trigger invisible Turnstile
+        if (window.turnstile && document.getElementById('cf-turnstile')) {
+          turnstile.execute(document.getElementById('cf-turnstile'));
+        } else {
+          setStatus('Turnstile konnte nicht initialisiert werden.');
+          startBtn.disabled = false;
+          startBtn.textContent = 'Server jetzt starten';
+        }
+      } catch (e) {
+        setStatus('Fehler beim Ausführen von Turnstile.');
+        startBtn.disabled = false;
+        startBtn.textContent = 'Server jetzt starten';
+      }
+    });
+
+    // Called by Turnstile on success
+    async function onTurnstileSuccess(token) {
+      if (!pendingStartPayload) return;
+      try {
+        const res = await fetch(WORKER_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'omit',
+          body: JSON.stringify({
+            address: pendingStartPayload.address,
+            cfTurnstileToken: token,
+          }),
         });
-        if(!res.ok) throw new Error("Start HTTP " + res.status);
-        hint.textContent = "Start angefordert. Prüfe Status…";
-        await waitUntilOnline();
-      }catch(e){
-        hint.textContent = "Start fehlgeschlagen.";
-        setStatus("offline");
-      }finally{
-        pendingStart = false;
-        setLoading(false);
-      }
-    };
 
-    async function startServer(){
-      setLoading(true, "Sicherheitsprüfung…");
-      setStatus("starting");
-      pendingStart = true;
-      if(window.turnstile){
-        try{ window.turnstile.execute("#cf-turnstile"); }
-        catch(e){ pendingStart = false; setLoading(false); setStatus("offline"); hint.textContent="Captcha konnte nicht geladen werden."; }
-      }else{
-        pendingStart = false;
-        setLoading(false);
-        setStatus("offline");
-        hint.textContent = "Captcha noch nicht bereit. Bitte kurz warten und erneut versuchen.";
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch { data = { ok: res.ok, message: text }; }
+
+        if (res.ok) {
+          setStatus(data.message || 'Serverstart ausgelöst.', true);
+        } else {
+          setStatus(data.error || data.message || 'Start fehlgeschlagen.');
+        }
+      } catch (e) {
+        setStatus('Netzwerkfehler beim Start-Request.');
+      } finally {
+        startBtn.disabled = false;
+        startBtn.textContent = 'Server jetzt starten';
+        pendingStartPayload = null;
+        // Reset token so next click gets a fresh one
+        try { turnstile.reset(document.getElementById('cf-turnstile')); } catch {}
       }
     }
 
-    async function fetchStatus(){
-      try{
-        const res = await fetch(`${WORKER_BASE}/status?host=${encodeURIComponent(HOST)}&port=${encodeURIComponent(PORT)}`, { mode:"cors" });
-        if(!res.ok) throw new Error("HTTP "+res.status);
-        const data = await res.json();
-        setStatus(data.online ? "online" : "offline");
-        return data.online ? "online" : "offline";
-      }catch(e){
-        hint.textContent = "Status konnte nicht abgerufen werden.";
-        return null;
-      }
+    // Called by Turnstile on error
+    function onTurnstileError() {
+      setStatus('Turnstile-Validierung fehlgeschlagen.');
+      startBtn.disabled = false;
+      startBtn.textContent = 'Server jetzt starten';
+      pendingStartPayload = null;
+      try { turnstile.reset(document.getElementById('cf-turnstile')); } catch {}
     }
 
-    async function waitUntilOnline(timeoutMs=180000){
-      const end = Date.now()+timeoutMs;
-      while(Date.now() < end){
-        const st = await fetchStatus();
-        if(st==="online"){ hint.textContent = "Server ist online."; return true; }
-        await new Promise(r=>setTimeout(r, POLL_MS));
-      }
-      hint.textContent = "Zeitüberschreitung beim Start.";
-      return false;
-    }
-
-    startBtn.addEventListener("click", startServer);
-    fetchStatus();
-    setInterval(fetchStatus, POLL_MS);
+    // Expose callbacks globally
+    window.onTurnstileSuccess = onTurnstileSuccess;
+    window.onTurnstileError = onTurnstileError;
   </script>
 </body>
 </html>
-
