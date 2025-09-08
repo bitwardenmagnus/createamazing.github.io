@@ -82,7 +82,6 @@
   @keyframes breathe{50%{transform:scale(1.04)}}
   @media (prefers-reduced-motion:reduce){.grid,.halo{animation:none}.cta{transition:none}}
 </style>
-<!-- Cloudflare Turnstile Client -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
@@ -110,10 +109,9 @@
 
       <p id="hint" class="sub" style="margin-top:14px; min-height:22px;"></p>
 
-      <!-- Unsichtbares Turnstile-Widget -->
       <div id="cf-turnstile"
            class="cf-turnstile"
-           data-sitekey="0x4AAAAAAB0B7uEwc5zscEyP"  <!-- TODO: ersetzen -->
+           data-sitekey="0x4AAAAAAB0B7uEwc5zscEyP"
            data-theme="dark"
            data-size="invisible"
            data-callback="onTurnstileSuccess">
@@ -123,9 +121,9 @@
 
   <script>
     // ======= CONFIG =======
-    const HOST = "createamazing";           // TODO: Host/Domain deines MC-Servers
-    const PORT = 26468;                     // TODO: Port falls nicht 25565
-    const WORKER_BASE = "https://still-hall-d6b4.ultimativergamer173.workers.dev"; // TODO: URL deines Backends
+    const HOST = "createamazing.falixsrv.me";
+    const PORT = 26468;
+    const WORKER_BASE = "https://still-hall-d6b4.ultimativergamer173.workers.dev";
 
     const POLL_MS = 5000;
 
@@ -146,7 +144,6 @@
       hint.textContent = msg;
     }
 
-    // Turnstile Flow
     let pendingStart = false;
     window.onTurnstileSuccess = async function(token){
       if(!pendingStart) return;
@@ -172,7 +169,6 @@
       setLoading(true, "Sicherheitsprüfung…");
       setStatus("starting");
       pendingStart = true;
-      // Unsichtbares Turnstile starten
       if(window.turnstile){
         try{ window.turnstile.execute("#cf-turnstile"); }
         catch(e){ pendingStart = false; setLoading(false); setStatus("offline"); hint.textContent="Captcha konnte nicht geladen werden."; }
@@ -186,13 +182,13 @@
 
     async function fetchStatus(){
       try{
-        const res = await fetch(`${WORKER_BASE}/status?host=${encodeURIComponent(HOST)}&port=${encodeURIComponent(PORT)}`);
+        const res = await fetch(`${WORKER_BASE}/status?host=${encodeURIComponent(HOST)}&port=${encodeURIComponent(PORT)}`, { mode:"cors" });
         if(!res.ok) throw new Error("HTTP "+res.status);
         const data = await res.json();
         setStatus(data.online ? "online" : "offline");
         return data.online ? "online" : "offline";
       }catch(e){
-        // Keine Änderung, dezente Meldung
+        hint.textContent = "Status konnte nicht abgerufen werden.";
         return null;
       }
     }
